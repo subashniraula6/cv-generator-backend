@@ -1,0 +1,7 @@
+Flask
+Flask-Cors
+Gunicorn
+openai
+python-dotenv
+google-serp-api
+pytrends
