@@ -1,7 +1,7 @@
 # README
 ### Local Dev
 ```
-python main.py
+python app.py
 ```
 ### For Server
 ```
