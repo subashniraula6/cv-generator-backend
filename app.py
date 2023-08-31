@@ -9,6 +9,7 @@ from views.user import user_bp
 
 from controllers.firebase_controller import Firebase_Controller
 
+from controllers.database import search_user_role
 # print(firebase_controller.create_user('ishanshrestha@gmail.com', 'testpassword123'))
 
 app = Flask(__name__)
@@ -22,6 +23,20 @@ app.register_blueprint(user_bp)
 @app.route("/")
 def read_root():
     return jsonify({"Backend": "Online!!!"})
+
+
+@app.route('/search')
+def search():
+    uid = request.args.get('uid')
+    if uid:
+        role = search_user_role(uid)
+        if role:
+            return jsonify({'uid': uid, 'role is ': role})
+        else:
+            return jsonify({'error' : "User not found"})
+    else:
+        return jsonify({'Error' : 'Missing uid parameter'})
+    
 
 if __name__ == "__main__":
     app.run()

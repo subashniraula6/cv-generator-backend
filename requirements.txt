@@ -4,3 +4,4 @@ Gunicorn
 openai
 python-dotenv
 
+mysql-connector-python
