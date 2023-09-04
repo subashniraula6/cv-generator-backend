@@ -13,7 +13,7 @@ gunicorn app:app
 CREATE USER 'newuser'@'localhost' IDENTIFIED by 'password';
 
 USE cvGenerator;
-GRANT ALL PRIVILEGES ON cvGenerator TO 'newuser'@'localhost'
+GRANT ALL PRIVILEGES ON cvGenerator TO 'newuser'@'localhost';
 ```
 
 ### To search User-role using uid
