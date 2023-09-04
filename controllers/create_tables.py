@@ -20,7 +20,7 @@ def create_application_user_roles_table(connection):
     cursor = connection.cursor()
     query = """
     CREATE TABLE IF NOT EXISTS application_user_roles (
-        id INT PRIMARY KEY,
+        id INT AUTO_INCREMENT PRIMARY KEY,
         role_name VARCHAR(20),
         create_ts DATETIME,
         update_ts DATETIME
@@ -36,7 +36,7 @@ def create_application_users_table(connection):
     cursor = connection.cursor()
     query = """
     CREATE TABLE IF NOT EXISTS application_users (
-        id INT PRIMARY KEY,
+        id INT AUTO_INCREMENT PRIMARY KEY,
         email VARCHAR(255),
         user_fname NVARCHAR(255),
         user_lname NVARCHAR(255),
@@ -57,7 +57,7 @@ def create_application_languages_table(connection):
     cursor = connection.cursor()
     query = """
     CREATE TABLE IF NOT EXISTS application_languages (
-        id INT PRIMARY KEY,
+        id INT AUTO_INCREMENT PRIMARY KEY,
         lang_abb VARCHAR(3),
         language_full VARCHAR(15),
         create_ts DATETIME,
@@ -74,7 +74,7 @@ def create_application_questions_table(connection):
     cursor = connection.cursor()
     query = """
     CREATE TABLE IF NOT EXISTS application_questions (
-        id INT PRIMARY KEY,
+        id INT AUTO_INCREMENT PRIMARY KEY,
         language_id INT,
         question_category VARCHAR(255),
         question_JSON NVARCHAR(10000),
@@ -93,7 +93,7 @@ def create_user_sessions_table(connection):
     cursor = connection.cursor()
     query = """
     CREATE TABLE IF NOT EXISTS user_sessions (
-      id INT PRIMARY KEY,
+      id INT AUTO_INCREMENT PRIMARY KEY,
       user_id INT,
       create_ts DATETIME,
       update_ts DATETIME,
@@ -110,7 +110,7 @@ def create_user_questions_table(connection):
     cursor = connection.cursor()
     query = """
     CREATE TABLE IF NOT EXISTS user_questions (
-        id INT PRIMARY KEY,
+        id INT AUTO_INCREMENT PRIMARY KEY,
         user_sessions INT,
         language_id INT,
         questions_category VARCHAR(20),
@@ -131,7 +131,7 @@ def create_application_menu_text_table(connection):
     cursor = connection.cursor()
     query = """
     CREATE TABLE IF NOT EXISTS application_menu_text (
-        id INT PRIMARY KEY,
+        id INT AUTO_INCREMENT PRIMARY KEY,
         language_id INT,
         menu_text_JSON NVARCHAR(10000),
         create_ts DATETIME,
