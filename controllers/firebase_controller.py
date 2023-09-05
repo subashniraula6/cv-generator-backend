@@ -1,6 +1,5 @@
 import firebase_admin
 from firebase_admin import credentials, auth
-
 from config import Config
 
 class Firebase_Controller:
@@ -9,7 +8,8 @@ class Firebase_Controller:
         self.password = ''
         firebase_private_key = Config.firebase_private_key_file('knegg_firebase_p_key.json')
         cred = credentials.Certificate(firebase_private_key)
-        firebase_admin.initialize_app(cred)    
+        if not firebase_admin._apps:
+            firebase_admin.initialize_app(cred)    
     
     # Function to verify the ID token sent by the client
     @staticmethod
