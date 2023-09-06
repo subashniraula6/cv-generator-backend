@@ -47,17 +47,17 @@ def get_test_token():
     return jsonify({"token": random_token})
 
 
-@app.route('/search')
-def search():
-    uid = request.args.get('uid')
-    if uid:
-        role = search_user_role(uid)
-        if role:
-            return jsonify({'uid': uid, 'role is ': role})
-        else:
-            return jsonify({'error' : "User not found"})
-    else:
-        return jsonify({'Error' : 'Missing uid parameter'})
+# @app.route('/search')
+# def search():
+#     uid = request.args.get('uid')
+#     if uid:
+#         role = search_user_role(uid)
+#         if role:
+#             return jsonify({'uid': uid, 'role is ': role})
+#         else:
+#             return jsonify({'error' : "User not found"})
+#     else:
+#         return jsonify({'Error' : 'Missing uid parameter'})
     
 
 firebase_controller = Firebase_Controller()
