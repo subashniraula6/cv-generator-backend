@@ -15,6 +15,7 @@ from firebase_admin import auth
 from controllers.create_tables import create_connection
 from controllers.firebase_controller import Firebase_Controller
 from mysql.connector import Error
+import secrets 
 # print(firebase_controller.create_user('ishanshrestha@gmail.com', 'testpassword123'))
 
 app = Flask(__name__)
@@ -31,8 +32,9 @@ def read_root():
 
 @app.route('/get_test_token', methods=['GET'])
 def get_test_token():
-    test_token = "your_test_token_here"
-    return jsonify({"token": test_token})
+    # Generate a random token (for demonstration purposes)
+    random_token = secrets.token_hex(16)  # Generates a 32-character hexadecimal token
+    return jsonify({"token": random_token})
 
 
 @app.route('/search')

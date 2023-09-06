@@ -4,7 +4,7 @@ import time
 time.sleep(5)
 
 url = 'http://127.0.0.1:5000/delete_user'
-params = {'user_id': 'USER_ID', 'token': 'TOKEN'}
+params = {'user_id': 'johndoe123', 'token': 'f146983f08669dfdfd9e4ad5b9e25b48'}
 # params = {'user_id': 'johndoe123'}
 
 response = requests.delete(url, params=params)
