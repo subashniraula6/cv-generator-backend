@@ -34,6 +34,14 @@ class Config:
         return config
 
     @staticmethod
+    def mySQL_alchemy_config():
+        config = {
+        "DATABASE_URI" :  'mysql+pymysql://knegUser:MyPassw0rd123!@localhost/kneg',
+        "TRACK_MODIFICATIONS" :  False
+        }
+        return config
+
+    @staticmethod
     def openAI_config():
         config = {
             "API_KEY": os.getenv('OPENAI_API_KEY'),
