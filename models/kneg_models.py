@@ -62,13 +62,13 @@ class UserQuestion(db.Model):
     __tablename__ = 'user_questions'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_sessions = db.Column(db.Integer, db.ForeignKey('user_sessions.id'))
+    # user_sessions = db.Column(db.Integer, db.ForeignKey('user_sessions.id'))
     language_id = db.Column(db.Integer, db.ForeignKey('application_languages.id'))
     questions_category = db.Column(db.String(20))
     question_JSON = db.Column(db.String(10000))
     create_ts = db.Column(db.DateTime)
     update_ts = db.Column(db.DateTime)
-    user_session = db.relationship('UserSession', foreign_keys=[user_sessions])
+    # user_session = db.relationship('UserSession', foreign_keys=[user_sessions])
     language = db.relationship('Language', foreign_keys=[language_id])
 
 # Define the MenuText model

@@ -6,7 +6,6 @@ from controllers.kneg_SQL_controller import *
 from config import Config
 
 # Configure
-
 kneg_bp = Blueprint('kneg', __name__)
 
 ##############################

@@ -1,5 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials, auth
+from models.kneg_models import db, User
+
 from config import Config
 
 
@@ -30,22 +32,29 @@ class Firebase_Controller:
             }
         
     # Function to create a new user
+   
     @staticmethod
     def create_user(email, password):
         try:
             user = auth.create_user(email=email, password=password)
             print(auth.generate_email_verification_link(email))
-            return ({
+
+            # Create a new user in your database with the provided email
+            new_user = User(email=email, user_fname=None, user_lname=None, user_role_id=None, u_id=None, create_ts=None, update_ts=None)
+            db.session.add(new_user)
+            db.session.commit()
+
+            return {
                 "status": 'Success',
                 "message": "New Account Created. Please verify your email address",
                 "uid": user.uid
-            })
+            }
         except auth.EmailAlreadyExistsError:
-            return ({
-                "status": 'Errorr',
-                "message": "User Email already exists. Try loggin in instead",
-            })
-
+            return {
+                "status": 'Error',
+                "message": "User Email already exists. Try logging in instead",
+            }
+    
     # Function to log in a user
     @staticmethod
     def login_user(email, password):

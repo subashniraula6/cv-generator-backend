@@ -11,12 +11,10 @@ from routes.user import user_bp
 from routes.kneg_routes import kneg_bp
 
 from controllers.firebase_controller import Firebase_Controller
-
-from controllers.database import search_user_role
-from controllers.database import search_user_role
+# from controllers.database import search_user_role
 
 from firebase_admin import auth
-from controllers.create_tables import create_connection
+# from controllers.create_tables import create_connection
 from controllers.firebase_controller import Firebase_Controller
 from mysql.connector import Error
 import secrets 
@@ -62,48 +60,48 @@ def get_test_token():
 
 firebase_controller = Firebase_Controller()
 
-@app.route('/delete_user', methods=['DELETE'])
-def delete_user():
-    print("page delete_user")
-    user_id = request.args.get('user_id')
-    token = request.args.get('token')
+# @app.route('/delete_user', methods=['DELETE'])
+# def delete_user():
+#     print("page delete_user")
+#     user_id = request.args.get('user_id')
+#     token = request.args.get('token')
 
-    # Verify the ID token
-    token_verification = firebase_controller.verify_id_token(token)
-    if token_verification['status'] == 'Error':
+#     # Verify the ID token
+#     token_verification = firebase_controller.verify_id_token(token)
+#     if token_verification['status'] == 'Error':
         
-        return jsonify(token_verification)
+#         return jsonify(token_verification)
 
-    # Delete the user from Firebase
-    try:
-        auth.delete_user(user_id)
-    except auth.AuthError as e:
-        print("error deleting")
-        return jsonify({
-            "status": "Error",
-            "message": f"An error occurred while deleting the user from Firebase: {e}"
-        })
+#     # Delete the user from Firebase
+#     try:
+#         auth.delete_user(user_id)
+#     except auth.AuthError as e:
+#         print("error deleting")
+#         return jsonify({
+#             "status": "Error",
+#             "message": f"An error occurred while deleting the user from Firebase: {e}"
+#         })
     
 
-    # Delete the user from the MySQL database
-    connection = create_connection()
-    cursor = connection.cursor()
-    print("Iniciating use Delete")
-    query = f"DELETE FROM application_users WHERE u_id = '{user_id}'"
-    try:
-        cursor.execute(query)
-        connection.commit()
-        print("deletion success")
-        return jsonify({
-            "status": "Success",
-            "message": "User deleted successfully from Firebase and MySQL database"
-        })
-    except Error as e:
-        print("Error aayo muji")
-        return jsonify({
-            "status": "Error",
-            "message": f"An error occurred while deleting the user from the MySQL database: {e}"
-        })
+#     # Delete the user from the MySQL database
+#     connection = create_connection()
+#     cursor = connection.cursor()
+#     print("Iniciating use Delete")
+#     query = f"DELETE FROM application_users WHERE u_id = '{user_id}'"
+#     try:
+#         cursor.execute(query)
+#         connection.commit()
+#         print("deletion success")
+#         return jsonify({
+#             "status": "Success",
+#             "message": "User deleted successfully from Firebase and MySQL database"
+#         })
+#     except Error as e:
+#         print("Error aayo muji")
+#         return jsonify({
+#             "status": "Error",
+#             "message": f"An error occurred while deleting the user from the MySQL database: {e}"
+#         })
 
 if __name__ == "__main__":
     app.run()
