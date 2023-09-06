@@ -150,4 +150,4 @@ db.insert_user_questions(2 ,1 ,'personal' ,question_JSON ,'2023-09-04 19:42:35' 
 
 # Insert data into the application_menu_text table
 menu_text_JSON = '{"menu_text": ["Home","About Us","Contact Us"]}'
-db.insert_application_menu_text(1 ,1 ,menu_text_JSON ,'2023-09-04 19')
+db.insert_application_menu_text(1 ,1 ,menu_text_JSON ,'2023-09-04 19:5:4', '2023-06-07 13:12:4')
