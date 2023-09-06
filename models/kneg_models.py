@@ -48,14 +48,14 @@ class Question(db.Model):
     language = db.relationship('Language', foreign_keys=[language_id])
 
 # Define the UserSession model
-class UserSession(db.Model):
-    __tablename__ = 'user_sessions'
+# class UserSession(db.Model):
+#     __tablename__ = 'user_sessions'
 
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('application_users.id'))
-    create_ts = db.Column(db.DateTime)
-    update_ts = db.Column(db.DateTime)
-    user = db.relationship('User', foreign_keys=[user_id])
+#     id = db.Column(db.Integer, primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('application_users.id'))
+#     create_ts = db.Column(db.DateTime)
+#     update_ts = db.Column(db.DateTime)
+#     user = db.relationship('User', foreign_keys=[user_id])
 
 # Define the UserQuestion model
 class UserQuestion(db.Model):
