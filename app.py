@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
+from config import Config
+from models.kneg_models import db
 
 from routes.openai_routes import openai_bp
 # from routes.trends import serpapi_bp
@@ -14,6 +16,11 @@ from controllers.firebase_controller import Firebase_Controller
 # print(firebase_controller.create_user('ishanshrestha@gmail.com', 'testpassword123'))
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = Config.mySQL_alchemy_config()['DATABASE_URI']
+db.init_app(app)
+with app.app_context():
+    print(app.app_context())
+    db.create_all()
 CORS(app)  # Enable CORS for all origins. Replace with specific origins if needed.
 
 app.register_blueprint(openai_bp)
