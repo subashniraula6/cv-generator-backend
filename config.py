@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Config:
     # Your other configuration settings here
@@ -18,6 +21,33 @@ class Config:
     def firebase_private_key_file(filename):
         private_key_path = os.path.join(Config.PRIVATE_KEY_DIR, filename)
         return (private_key_path)
+    
+    @staticmethod
+    def mySQL_config():
+        config = {
+            "db_host" : os.getenv('DB_HOST'),
+            "db_port" : os.getenv('DB_PORT'),
+            "db_name" : os.getenv('DB_NAME'),
+            "db_user" : os.getenv('DB_USER'),
+            "db_password" : os.getenv('DB_PASSWORD'),
+        }
+        return config
+
+    @staticmethod
+    def mySQL_alchemy_config():
+        config = {
+        "DATABASE_URI" :  'mysql+pymysql://knegUser:MyPassw0rd123!@localhost/kneg',
+        "TRACK_MODIFICATIONS" :  False
+        }
+        return config
+
+    @staticmethod
+    def openAI_config():
+        config = {
+            "API_KEY": os.getenv('OPENAI_API_KEY'),
+            "password": os.getenv('PASSWORD'),
+        }
+        return config
 
 class DevelopmentConfig(Config):
     DEBUG = True

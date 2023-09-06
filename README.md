@@ -26,3 +26,7 @@ uid	      "user2"
 
 ```
 
+
+mysql -u knegUser -p
+GRANT CREATE ON kneg.* TO 'knegUser'@'localhost';
+

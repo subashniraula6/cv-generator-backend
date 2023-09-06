@@ -1,14 +1,24 @@
+import os
+from dotenv import load_dotenv
 import mysql.connector
 from mysql.connector import Error
+
+load_dotenv()
 
 def create_connection():
     connection = None
     try:
+        db_host = os.getenv('DB_HOST')
+        # db_port = os.getenv('DB_PORT')
+        db_name = os.getenv('DB_NAME')
+        db_user = os.getenv('DB_USER')
+        db_password = os.getenv('DB_PASSWORD')
         connection = mysql.connector.connect(
-            host='localhost',
-            user='newuser',
-            passwd='password',
-            database='cvGenerator'
+            host=db_host,
+            # port=db_port,
+            database=db_name,
+            user=db_user,
+            password=db_password
         )
         print("Connection to MySQL DB successful")
     except Error as e:
@@ -84,6 +94,31 @@ def insert_user(connection, uid, name, user_type):
         print("User inserted successfully")
     except Error as e:
         print(f"The error '{e}' occurred")
+
+
+def insert_application_users(email: str
+                             , user_fname: str
+                             , user_lname: str
+                             , u_id: str
+                             ):
+    connection = create_connection()
+    cursor = connection.cursor()
+    query = """
+    INSERT INTO kneg.application_users(email
+                                    , user_fname
+                                    , user_lname
+                                    , user_role_id
+                                    , u_id
+                                    , create_ts
+                                    , update_ts
+                                    , delete_ts) 
+    VALUES(%s, %s, %s, 0, %s, NOW(), NOW(), NULL)
+    """
+    values = (email, user_fname, user_lname, u_id)
+    cursor.execute(query, values)
+    connection.commit()
+    cursor.close()
+    connection.close()
 
 
 
