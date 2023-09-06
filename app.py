@@ -2,10 +2,11 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 
-from views.openai_view import openai_bp
-# from views.trends import serpapi_bp
-from views.questions import questions_bp
-from views.user import user_bp
+from routes.openai_routes import openai_bp
+# from routes.trends import serpapi_bp
+from routes.questions import questions_bp
+from routes.user import user_bp
+from routes.kneg_routes import kneg_bp
 
 from controllers.firebase_controller import Firebase_Controller
 
@@ -19,6 +20,7 @@ app.register_blueprint(openai_bp)
 # app.register_blueprint(serpapi_bp)
 app.register_blueprint(questions_bp)
 app.register_blueprint(user_bp)
+app.register_blueprint(kneg_bp)
 
 @app.route("/")
 def read_root():

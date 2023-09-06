@@ -26,3 +26,6 @@ uid	      "user2"
 
 ```
 
+
+ mysql -u knegUser -p
+
