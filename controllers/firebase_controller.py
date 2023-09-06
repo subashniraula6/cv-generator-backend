@@ -2,6 +2,8 @@ import firebase_admin
 from firebase_admin import credentials, auth
 from config import Config
 
+
+
 class Firebase_Controller:
     def __init__(self):
         self.email = ''
@@ -13,7 +15,7 @@ class Firebase_Controller:
     
     # Function to verify the ID token sent by the client
     @staticmethod
-    def verify_id_token(self, id_token):
+    def verify_id_token( id_token):
         try:
             decoded_token = auth.verify_id_token(id_token)
             return {
