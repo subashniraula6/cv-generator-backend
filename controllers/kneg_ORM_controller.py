@@ -46,6 +46,10 @@ def get_all_users():
 def get_user_by_id(user_id):
     return User.query.get(user_id)
 
+# Function to get users by u_id
+def get_users_by_u_id(u_id):
+    return User.query.filter_by(u_id=u_id).all()
+
 # Function to modify an existing user
 def modify_user(user_id, email, user_fname, user_lname, user_role_id, u_id, update_ts):
     user = User.query.get(user_id)
@@ -194,3 +198,66 @@ def modify_menu_text(menu_text_id, language_id, menu_text_JSON, update_ts):
         return menu_text  # Return the modified menu text object
     else:
         return None  # Menu text with the given ID not found
+    
+##############################
+# DELETE FUNCTIONS
+
+# Function to delete a user role by ID
+def delete_user_role_by_id(role_id):
+    role = UserRole.query.get(role_id)
+    if role:
+        db.session.delete(role)
+        db.session.commit()
+        return True  # Successfully deleted
+    else:
+        return False  # Role with the given ID not found
+
+# Function to delete a user by ID
+def delete_user_by_id(user_id):
+    user = User.query.get(user_id)
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        return True  # Successfully deleted
+    else:
+        return False  # User with the given ID not found
+
+# Function to delete a language by ID
+def delete_language_by_id(language_id):
+    language = Language.query.get(language_id)
+    if language:
+        db.session.delete(language)
+        db.session.commit()
+        return True  # Successfully deleted
+    else:
+        return False  # Language with the given ID not found
+
+# Function to delete a question by ID
+def delete_question_by_id(question_id):
+    question = Question.query.get(question_id)
+    if question:
+        db.session.delete(question)
+        db.session.commit()
+        return True  # Successfully deleted
+    else:
+        return False  # Question with the given ID not found
+
+# Function to delete a user question by ID
+def delete_user_question_by_id(user_question_id):
+    user_question = UserQuestion.query.get(user_question_id)
+    if user_question:
+        db.session.delete(user_question)
+        db.session.commit()
+        return True  # Successfully deleted
+    else:
+        return False  # User question with the given ID not found
+
+# Function to delete a menu text by ID
+def delete_menu_text_by_id(menu_text_id):
+    menu_text = MenuText.query.get(menu_text_id)
+    if menu_text:
+        db.session.delete(menu_text)
+        db.session.commit()
+        return True  # Successfully deleted
+    else:
+        return False  # Menu text with the given ID not found

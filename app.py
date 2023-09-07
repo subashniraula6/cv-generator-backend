@@ -23,9 +23,13 @@ import secrets
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = Config.mySQL_alchemy_config()['DATABASE_URI']
 db.init_app(app)
-with app.app_context():
-    print(app.app_context())
-    db.create_all()
+
+
+# # Create all tables in database. Comment after first time use
+# with app.app_context():
+#     print(app.app_context())
+#     db.create_all()
+
 CORS(app)  # Enable CORS for all origins. Replace with specific origins if needed.
 
 app.register_blueprint(openai_bp)

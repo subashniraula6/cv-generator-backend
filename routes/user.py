@@ -12,7 +12,7 @@ def test():
     return jsonify({"active": "yes"})
 
 @user_bp.route('/signup', methods=['POST'])
-def get_trends():
+def signup():
     try:
         data = request.json
         email = data.get("email")
@@ -22,3 +22,15 @@ def get_trends():
         return jsonify({"response": response})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@user_bp.route('/delete_user', methods=['POST'])
+def delete_user():
+    try:
+        data = request.json
+        u_id = data.get("u_id")
+        token = data.get("token")
+        if firebase.delete_user(u_id, token):
+            return jsonify({"success": "User deleted successfully"}), 200
+    except: 
+        return jsonify({"error": "An error Occurred while deleting user."}), 500
+        

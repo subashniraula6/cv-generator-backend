@@ -1,7 +1,7 @@
 import json
 from flask import request, jsonify, Blueprint
 
-from controllers.kneg_SQL_controller import *
+from controllers.kneg_ORM_controller import *
 # from models.kneg_models import db
 from config import Config
 
@@ -60,7 +60,15 @@ def modify_user_role_route(role_id):
             return jsonify({"error": "User role not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
+# Route to delete a user role by ID
+@kneg_bp.route('/kneg/user-role/<int:role_id>', methods=['DELETE'])
+def delete_user_role_by_id_route(role_id):
+    if delete_user_role_by_id(role_id):
+        return jsonify({"message": "User role deleted successfully"}), 200
+    else:
+        return jsonify({"error": "User role not found"}), 404
+
 
 ##########################
 # Route to add a new user
@@ -140,6 +148,14 @@ def modify_user_route(user_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Route to delete a user by ID
+@kneg_bp.route('/kneg/user/<int:user_id>', methods=['DELETE'])
+def delete_user_by_id_route(user_id):
+    if delete_user_by_id(user_id):
+        return jsonify({"message": "User deleted successfully"}), 200
+    else:
+        return jsonify({"error": "User not found"}), 404
+
 
 ##############################
 # Route to add a new language
@@ -208,6 +224,13 @@ def modify_language_route(language_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Route to delete a language by ID
+@kneg_bp.route('/kneg/language/<int:language_id>', methods=['DELETE'])
+def delete_language_by_id_route(language_id):
+    if delete_language_by_id(language_id):
+        return jsonify({"message": "Language deleted successfully"}), 200
+    else:
+        return jsonify({"error": "Language not found"}), 404
 
 
 #############################
@@ -280,6 +303,15 @@ def modify_question_route(question_id):
             return jsonify({"error": "Question not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# Route to delete a question by ID
+@kneg_bp.route('/kneg/question/<int:question_id>', methods=['DELETE'])
+def delete_question_by_id_route(question_id):
+    if delete_question_by_id(question_id):
+        return jsonify({"message": "Question deleted successfully"}), 200
+    else:
+        return jsonify({"error": "Question not found"}), 404
 
 
 ##################################
@@ -358,6 +390,13 @@ def modify_user_question_route(user_question_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Route to delete a user question by ID
+@kneg_bp.route('/kneg/user-question/<int:user_question_id>', methods=['DELETE'])
+def delete_user_question_by_id_route(user_question_id):
+    if delete_user_question_by_id(user_question_id):
+        return jsonify({"message": "User question deleted successfully"}), 200
+    else:
+        return jsonify({"error": "User question not found"}), 404
 
 
 #####################################
@@ -426,3 +465,11 @@ def modify_menu_text_route(menu_text_id):
             return jsonify({"error": "Menu Text not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# Route to delete a menu text by ID
+@kneg_bp.route('/kneg/menu-text/<int:menu_text_id>', methods=['DELETE'])
+def delete_menu_text_by_id_route(menu_text_id):
+    if delete_menu_text_by_id(menu_text_id):
+        return jsonify({"message": "Menu text deleted successfully"}), 200
+    else:
+        return jsonify({"error": "Menu text not found"}), 404
