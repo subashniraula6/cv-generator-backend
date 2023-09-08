@@ -131,6 +131,11 @@ GET http://127.0.0.1:5000/kneg/questions
 GET http://127.0.0.1:5000/kneg/question/{question_id}
 ```
 
+## Get Question by User ID (GET):
+```
+GET http://127.0.0.1:5000/kneg/questions_per_user/{user_id}
+```
+
 ## Modify Question (PUT):
 ```
 PUT http://127.0.0.1:5000/kneg/question/<question_id>
