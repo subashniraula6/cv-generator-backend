@@ -278,6 +278,29 @@ def get_question_by_id_route(question_id):
     else:
         return jsonify({"error": "Question not found"}), 404
 
+
+@kneg_bp.route('/kneg/questions_per_user/<int:user_id>', methods=['GET'])
+def get_questions_by_user_id_route(user_id):
+    try:
+        # Fetch questions by user_id
+        questions = UserQuestion.query.filter_by(user_id=user_id).all()
+
+        if questions:
+            question_data = []
+            for question in questions:
+                question_data.append({
+                    "id": question.id,
+                    "language_id": question.language_id,
+                    "question_category": question.question_category,
+                    "question_JSON": question.question_JSON,
+                    "create_ts": question.create_ts.strftime('%Y-%m-%d %H:%M:%S'),
+                    "update_ts": question.update_ts.strftime('%Y-%m-%d %H:%M:%S')
+                })
+            return jsonify({"data": question_data}), 200
+        else:
+            return jsonify({"error": "No questions found for the user"}), 404
+    except Exception as e:
+        return jsonify({"error": "An error occurred while fetching questions"}), 500
 # Route to modify an existing question
 @kneg_bp.route('/kneg/question/<int:question_id>', methods=['PUT'])
 def modify_question_route(question_id):
