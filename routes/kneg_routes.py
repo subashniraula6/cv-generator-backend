@@ -1,9 +1,15 @@
+import os
 import json
-from flask import request, jsonify, Blueprint
-
+from flask import request, jsonify, Blueprint, send_from_directory
 from controllers.kneg_ORM_controller import *
-# from models.kneg_models import db
-from config import Config
+
+UPLOAD_FOLDER = 'public/user_images'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 # Configure
 kneg_bp = Blueprint('kneg', __name__)
@@ -496,3 +502,45 @@ def delete_menu_text_by_id_route(menu_text_id):
         return jsonify({"message": "Menu text deleted successfully"}), 200
     else:
         return jsonify({"error": "Menu text not found"}), 404
+    
+
+# Route For image upload and retrieve
+# Endpoint to upload an image
+@kneg_bp.route('/kneg/upload_image', methods=['POST'])
+def upload_image():
+    try:
+        data = request.json
+        user_id = data.user_id
+        if user_id == None:
+            return jsonify({"error": "User Id not found"})
+        # Check if the 'file' key is in the request
+        if 'file' not in request.files:
+            return jsonify({"error": "No file part"}), 400
+
+        file = request.files['file']
+
+        # Check if the file has an allowed extension
+        if file and allowed_file(file.filename):
+            # Save the file to the upload folder
+            extension = os.path.splitext(file.filename)[1]
+            image_file_name = f'user_image_{user_id}.{extension}'
+            file.save(os.path.join(UPLOAD_FOLDER, image_file_name))
+            return jsonify({"message": "File uploaded successfully"}), 200
+        else:
+            return jsonify({"error": "Invalid file or file type"}), 400
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Endpoint to retrieve an image by filename
+@kneg_bp.route('/kneg/images/<string:filename>', methods=['GET'])
+def get_image(filename):
+    try:
+        # Ensure the requested file exists in the upload folder
+        if os.path.isfile(os.path.join(UPLOAD_FOLDER, filename)):
+            return send_from_directory(UPLOAD_FOLDER, filename)
+        else:
+            return jsonify({"error": "Image not found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
