@@ -130,9 +130,9 @@ def modify_question(question_id, language_id, question_category, question_JSON, 
 
 ####################################
 # Function to add a new user question
-def add_user_question(user_sessions, language_id, questions_category, question_JSON, create_ts, update_ts):
+def add_user_question(user_id, language_id, questions_category, question_JSON, create_ts, update_ts):
     new_user_question = UserQuestion(
-        user_sessions=user_sessions,
+        user_id=user_id,
         language_id=language_id,
         questions_category=questions_category,
         question_JSON=question_JSON,
@@ -152,10 +152,10 @@ def get_user_question_by_id(user_question_id):
     return UserQuestion.query.get(user_question_id)
 
 # Function to modify an existing user question
-def modify_user_question(user_question_id, user_sessions, language_id, questions_category, question_JSON, update_ts):
+def modify_user_question(user_question_id, user_id, language_id, questions_category, question_JSON, update_ts):
     user_question = UserQuestion.query.get(user_question_id)
     if user_question:
-        user_question.user_sessions = user_sessions
+        user_question.user_id = user_id
         user_question.language_id = language_id
         user_question.questions_category = questions_category
         user_question.question_JSON = question_JSON

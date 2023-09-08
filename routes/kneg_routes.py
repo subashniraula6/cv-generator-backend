@@ -241,7 +241,7 @@ def add_question_route():
         data = request.json
         language_id = data.get('language_id')
         question_category = data.get('question_category')
-        question_JSON = data.get('question_JSON')
+        question_JSON = json.dumps(data.get('question_JSON'))
         create_ts = data.get('create_ts')  # You can format this as needed
         update_ts = data.get('update_ts')  # You can format this as needed
 
@@ -257,7 +257,7 @@ def add_question_route():
 @kneg_bp.route('/kneg/questions', methods=['GET'])
 def get_all_questions_route():
     questions = get_all_questions()
-    questions_data = [{"id": question.id, "language_id": question.language_id, "question_category": question.question_category}
+    questions_data = [{"id": question.id, "language_id": question.language_id, "question_category": question.question_category, "question_JSON": question.question_JSON}
                       for question in questions]
     return jsonify({"data": questions_data}), 200
 
@@ -320,15 +320,15 @@ def delete_question_by_id_route(question_id):
 def add_user_question_route():
     try:
         data = request.json
-        user_sessions = data.get('user_sessions')
+        user_id = data.get('user_id')
         language_id = data.get('language_id')
         questions_category = data.get('questions_category')
-        question_JSON = data.get('question_JSON')
+        question_JSON = json.dumps(data.get('question_JSON'))
         create_ts = data.get('create_ts')  # You can format this as needed
         update_ts = data.get('update_ts')  # You can format this as needed
 
-        if user_sessions and language_id and questions_category and question_JSON and create_ts and update_ts:
-            new_user_question = add_user_question(user_sessions, language_id, questions_category, question_JSON, create_ts, update_ts)
+        if user_id and language_id and questions_category and question_JSON and create_ts and update_ts:
+            new_user_question = add_user_question(user_id, language_id, questions_category, question_JSON, create_ts, update_ts)
             return jsonify({"message": "User Question added successfully"}), 200
         else:
             return jsonify({"error": "Missing required data"}), 400
@@ -351,7 +351,7 @@ def get_user_question_by_id_route(user_question_id):
     if user_question:
         user_question_data = {
             "id": user_question.id,
-            "user_sessions": user_question.user_sessions,
+            "user_id": user_question.user_id,
             "language_id": user_question.language_id,
             "questions_category": user_question.questions_category,
             "question_JSON": user_question.question_JSON,

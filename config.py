@@ -36,7 +36,7 @@ class Config:
     @staticmethod
     def mySQL_alchemy_config():
         config = {
-        "DATABASE_URI" :  'mysql+pymysql://knegUser:MyPassw0rd123!@localhost/kneg',
+        "DATABASE_URI" :  'mysql+pymysql://root:admin@localhost/kneg',
         "TRACK_MODIFICATIONS" :  False
         }
         return config
