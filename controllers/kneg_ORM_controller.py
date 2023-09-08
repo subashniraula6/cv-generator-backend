@@ -127,6 +127,18 @@ def modify_question(question_id, language_id, question_category, question_JSON, 
         return None  # Question with the given ID not found
     
 
+# Function to populate user questions with application questions
+def pupulate_user_questions(user_id):
+    app_questions = Question.query.all()
+    user_questions = map(lambda question: UserQuestion(
+        user_id=user_id,
+        language_id=question.language_id,
+        questions_category=question.question_category,
+        question_JSON=question.question_JSON,
+        create_ts=question.create_ts,
+        update_ts=question.update_ts
+    ), app_questions)
+    return user_questions
 
 ####################################
 # Function to add a new user question

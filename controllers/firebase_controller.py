@@ -4,7 +4,7 @@ from flask import jsonify
 from models.kneg_models import db, User
 
 from config import Config
-
+from controllers.kneg_ORM_controller import pupulate_user_questions
 
 
 class Firebase_Controller:
@@ -43,6 +43,11 @@ class Firebase_Controller:
             # Create a new user in your database with the provided email
             new_user = User(email=email, user_fname=None, user_lname=None, user_role_id=None, u_id=user.uid, create_ts=None, update_ts=None)
             db.session.add(new_user)
+            db.session.commit()
+
+            # populate user question from application question
+            user_questions = pupulate_user_questions(new_user.id)
+            db.session.add_all(user_questions)
             db.session.commit()
 
             return {
