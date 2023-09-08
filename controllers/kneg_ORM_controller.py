@@ -261,3 +261,25 @@ def delete_menu_text_by_id(menu_text_id):
         return True  # Successfully deleted
     else:
         return False  # Menu text with the given ID not found
+    
+
+def filter_data(data, user_id, title=None, question=None, answer=None):
+    filtered_data = {}
+
+    for category, category_data in data.items():
+        filtered_category = {"title": category_data["title"], "questions": []}
+        for q in category_data["questions"]:
+            if (
+                (title is None or title.lower() in category_data["title"].lower())
+                and (question is None or question.lower() in q["question"].lower())
+                and (answer is None or answer.lower() in q["answer"].lower())
+            ):
+                filtered_category["questions"].append(q)
+
+        if filtered_category["questions"]:
+            filtered_data[category] = filtered_category
+
+    user = User.query.get(user_id)
+    user_email = user.email if user else None
+    
+    return {"user_id": user_id, "user_email": user_email, "filtered_data": filtered_data}
