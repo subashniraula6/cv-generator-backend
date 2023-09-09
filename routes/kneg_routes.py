@@ -1,9 +1,15 @@
+import os
 import json
-from flask import request, jsonify, Blueprint
-
+from flask import request, jsonify, Blueprint, send_from_directory
 from controllers.kneg_ORM_controller import *
-# from models.kneg_models import db
-from config import Config
+
+UPLOAD_FOLDER = 'public/user_images'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 # Configure
 kneg_bp = Blueprint('kneg', __name__)
@@ -465,21 +471,6 @@ def get_all_menu_texts_route():
                        for menu_text in menu_texts]
     return jsonify({"data": menu_texts_data}), 200
 
-# Route to get a menu text by ID
-@kneg_bp.route('/kneg/menu_text/<int:menu_text_id>', methods=['GET'])
-def get_menu_text_by_id_route(menu_text_id):
-    menu_text = get_menu_text_by_id(menu_text_id)
-    if menu_text:
-        menu_text_data = {
-            "id": menu_text.id,
-            "language_id": menu_text.language_id,
-            "menu_text_JSON": menu_text.menu_text_JSON,
-            "create_ts": menu_text.create_ts.strftime('%Y-%m-%d %H:%M:%S'),
-            "update_ts": menu_text.update_ts.strftime('%Y-%m-%d %H:%M:%S')
-        }
-        return jsonify({"data": menu_text_data}), 200
-    else:
-        return jsonify({"error": "Menu Text not found"}), 404
 
 # Route to modify an existing menu text
 @kneg_bp.route('/kneg/menu_text/<int:menu_text_id>', methods=['PUT'])
@@ -512,3 +503,84 @@ def delete_menu_text_by_id_route(menu_text_id):
         return jsonify({"message": "Menu text deleted successfully"}), 200
     else:
         return jsonify({"error": "Menu text not found"}), 404
+    
+
+# Route For image upload and retrieve
+# Endpoint to upload an image
+@kneg_bp.route('/kneg/upload_image', methods=['POST'])
+def upload_image():
+    try:
+        data = request.json
+        user_id = data.user_id
+        if user_id == None:
+            return jsonify({"error": "User Id not found"})
+        # Check if the 'file' key is in the request
+        if 'file' not in request.files:
+            return jsonify({"error": "No file part"}), 400
+
+        file = request.files['file']
+
+        # Check if the file has an allowed extension
+        if file and allowed_file(file.filename):
+            # Save the file to the upload folder
+            extension = os.path.splitext(file.filename)[1]
+            image_file_name = f'user_image_{user_id}.{extension}'
+            file.save(os.path.join(UPLOAD_FOLDER, image_file_name))
+            return jsonify({"message": "File uploaded successfully"}), 200
+        else:
+            return jsonify({"error": "Invalid file or file type"}), 400
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Endpoint to retrieve an image by filename
+@kneg_bp.route('/kneg/images/<string:filename>', methods=['GET'])
+def get_image(filename):
+    try:
+        # Ensure the requested file exists in the upload folder
+        if os.path.isfile(os.path.join(UPLOAD_FOLDER, filename)):
+            return send_from_directory(UPLOAD_FOLDER, filename)
+        else:
+            return jsonify({"error": "Image not found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# User input filtering
+# Route to filter data based on user, title, question, and answer
+@kneg_bp.route('/kneg/filter_data', methods=['GET'])
+def filter_data_route():
+    try:
+        # Get parameters from the request query string
+        user_id = request.args.get('user_id', type=int)
+        title = request.args.get('title')
+        question = request.args.get('question')
+        answer = request.args.get('answer')
+
+        # Query UserQuestion records based on user_id
+        user_questions = UserQuestion.query.filter_by(user_id=user_id).all()
+
+        # Initialize an empty list to store filtered results
+        filtered_results = []
+
+        # Loop through the user questions and apply filtering
+        for user_question in user_questions:
+            # Parse the question_JSON string to extract data
+            data = json.loads(user_question.question_JSON)
+
+            # Call the filter_data function to filter the data
+            result = filter_data(data, user_id, title, question, answer)
+
+            # If there is filtered data, add it to the filtered results list
+            if result["filtered_data"]:
+                filtered_results.append(result)
+
+        # Check if there is any filtered data or not
+        if filtered_results:
+            return jsonify(filtered_results), 200
+        else:
+            return jsonify({"message": "No matching data found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
