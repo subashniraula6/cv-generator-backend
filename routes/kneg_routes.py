@@ -99,6 +99,25 @@ def get_all_users_route():
     users_data = [{"id": user.id, "email": user.email} for user in users]
     return jsonify({"data": users_data}), 200
 
+# Route to get a user by FIREBASE ID
+@kneg_bp.route('/kneg/fbuser/<string:u_id>', methods=['GET'])
+def get_user_by_firebase_id_route(u_id):
+    user = get_users_by_u_id(u_id)
+    if user:
+        user_data = {
+            "id": user.id,
+            "email": user.email,
+            "user_fname": user.user_fname,
+            "user_lname": user.user_lname,
+            "user_role": UserRole.query.get(user.user_role_id).role_name,
+            "u_id": user.u_id,
+            "create_ts": user.create_ts,
+            "update_ts": user.update_ts
+        }
+        return jsonify({"data": user_data}), 200
+    else:
+        return jsonify({"error": "User not found"}), 404
+
 # Route to get a user by ID
 @kneg_bp.route('/kneg/user/<int:user_id>', methods=['GET'])
 def get_user_by_id_route(user_id):
@@ -111,8 +130,8 @@ def get_user_by_id_route(user_id):
             "user_lname": user.user_lname,
             "user_role_id": user.user_role_id,
             "u_id": user.u_id,
-            "create_ts": user.create_ts.strftime('%Y-%m-%d %H:%M:%S'),
-            "update_ts": user.update_ts.strftime('%Y-%m-%d %H:%M:%S')
+            "create_ts": user.create_ts,
+            "update_ts": user.update_ts
         }
         return jsonify({"data": user_data}), 200
     else:
@@ -281,16 +300,17 @@ def get_question_by_id_route(question_id):
 
 @kneg_bp.route('/kneg/questions_per_user/<string:user_id>', methods=['GET'])
 def get_questions_by_user_id_route(user_id):
-    user = User.query.filter_by(u_id=user_id).all()[0]
+    user = User.query.filter_by(u_id=user_id).first()
     try:
         # Fetch questions by user_id
         questions = UserQuestion.query.filter_by(user_id=user.id).all()
         if questions:
             question_data = []
             for question in questions:
+                language = Language.query.filter_by(id=question.language_id).first().lang_abb
                 question_data.append({
                     "id": question.id,
-                    "language_id": question.language_id,
+                    "language": language,
                     "question_category": question.questions_category,
                     "question_JSON": question.question_JSON,
                     "create_ts": question.create_ts.strftime('%Y-%m-%d %H:%M:%S'),
@@ -390,17 +410,13 @@ def get_user_question_by_id_route(user_question_id):
 def modify_user_question_route(user_question_id):
     try:
         data = request.json
-        user_sessions = data.get('user_sessions')
-        language_id = data.get('language_id')
-        questions_category = data.get('questions_category')
-        question_JSON = data.get('question_JSON')
-        update_ts = data.get('update_ts')  # You can format this as needed
+        question_JSON = json.dumps(data.get('question_JSON'))
 
-        user_question = modify_user_question(user_question_id, user_sessions, language_id, questions_category, question_JSON, update_ts)
+        user_question = modify_user_question(user_question_id, question_JSON)
         if user_question:
             user_question_data = {
                 "id": user_question.id,
-                "user_sessions": user_question.user_sessions,
+                "user_id": user_question.user_id,
                 "language_id": user_question.language_id,
                 "questions_category": user_question.questions_category,
                 "question_JSON": user_question.question_JSON,

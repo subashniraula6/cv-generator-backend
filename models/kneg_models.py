@@ -19,7 +19,7 @@ class User(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     user_fname = db.Column(db.String(255))
     user_lname = db.Column(db.String(255))
-    user_role_id = db.Column(db.Integer, db.ForeignKey('application_user_roles.id'))
+    user_role_id = db.Column(db.Integer, db.ForeignKey('application_user_roles.id'), default=2) # Defaut role is 'User'
     u_id = db.Column(db.String(255))
     create_ts = db.Column(db.DateTime)
     update_ts = db.Column(db.DateTime)

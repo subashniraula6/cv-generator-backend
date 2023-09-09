@@ -48,7 +48,7 @@ def get_user_by_id(user_id):
 
 # Function to get users by u_id
 def get_users_by_u_id(u_id):
-    return User.query.filter_by(u_id=u_id).all()
+    return User.query.filter_by(u_id=u_id).first()
 
 # Function to modify an existing user
 def modify_user(user_id, email, user_fname, user_lname, user_role_id, u_id, update_ts):
@@ -164,14 +164,10 @@ def get_user_question_by_id(user_question_id):
     return UserQuestion.query.get(user_question_id)
 
 # Function to modify an existing user question
-def modify_user_question(user_question_id, user_id, language_id, questions_category, question_JSON, update_ts):
+def modify_user_question(user_question_id, question_JSON):
     user_question = UserQuestion.query.get(user_question_id)
     if user_question:
-        user_question.user_id = user_id
-        user_question.language_id = language_id
-        user_question.questions_category = questions_category
         user_question.question_JSON = question_JSON
-        user_question.update_ts = update_ts
         db.session.commit()
         return user_question  # Return the modified user question object
     else:
