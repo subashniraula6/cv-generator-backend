@@ -102,7 +102,7 @@ def add_user_route():
 @kneg_bp.route('/kneg/users', methods=['GET'])
 def get_all_users_route():
     users = get_all_users()
-    users_data = [{"id": user.id, "email": user.email} for user in users]
+    users_data = [{"id": user.id, "email": user.email, "fname":user.user_fname, "lname":user.user_lname, "uid": user.u_id} for user in users]
     return jsonify({"data": users_data}), 200
 
 # Route to get a user by FIREBASE ID
@@ -193,6 +193,11 @@ def add_language_route():
         create_ts = data.get('create_ts')  # You can format this as needed
         update_ts = data.get('update_ts')  # You can format this as needed
 
+        # Find if language is already present
+        existing_language = Language.query.filter_by(lang_abb=lang_abb).first()
+        if (existing_language):
+            return jsonify({"error": "Language already exists"}), 400
+
         if lang_abb and language_full and create_ts and update_ts:
             new_language = add_language(lang_abb, language_full, create_ts, update_ts)
             return jsonify({"message": "Language added successfully"}), 200
@@ -282,7 +287,7 @@ def add_question_route():
 @kneg_bp.route('/kneg/questions', methods=['GET'])
 def get_all_questions_route():
     questions = get_all_questions()
-    questions_data = [{"id": question.id, "language_id": question.language_id, "question_category": question.question_category, "question_JSON": question.question_JSON}
+    questions_data = [{"id": question.id, "language": Language.query.filter_by(id=question.language_id).first().lang_abb, "question_category": question.question_category, "question_JSON": question.question_JSON}
                       for question in questions]
     return jsonify({"data": questions_data}), 200
 
@@ -327,17 +332,15 @@ def get_questions_by_user_id_route(user_id):
             return jsonify({"error": "No questions found for the user"}), 404
     except Exception as e:
         return jsonify({"error": e}), 500
+    
 # Route to modify an existing question
 @kneg_bp.route('/kneg/question/<int:question_id>', methods=['PUT'])
 def modify_question_route(question_id):
     try:
         data = request.json
-        language_id = data.get('language_id')
-        question_category = data.get('question_category')
-        question_JSON = data.get('question_JSON')
-        update_ts = data.get('update_ts')  # You can format this as needed
-
-        question = modify_question(question_id, language_id, question_category, question_JSON, update_ts)
+        question_JSON = json.dumps(data.get('question_JSON'))
+        question = modify_question(question_id, question_JSON)
+        print(question)
         if question:
             question_data = {
                 "id": question.id,

@@ -1,5 +1,6 @@
 # db_controller.py
 from models.kneg_models import db, UserRole, User, Language, Question, UserQuestion, MenuText
+import json
 
 # Function to add a new user role
 def add_user_role(role_name, create_ts, update_ts):
@@ -65,6 +66,17 @@ def modify_user(user_id, email, user_fname, user_lname, user_role_id, u_id, upda
     else:
         return None  # User with the given ID not found
 
+# Function to replace specific keys with empty strings
+def replace_keys_with_empty_strings(data):
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if key in ["question", "title", "options", "hint"]:
+                data[key] = ""
+            elif isinstance(value, (dict, list)):
+                replace_keys_with_empty_strings(value)
+    elif isinstance(data, list):
+        for item in data:
+            replace_keys_with_empty_strings(item)
 
 ################################
 # Function to add a new language
@@ -72,6 +84,30 @@ def add_language(lang_abb, language_full, create_ts, update_ts):
     new_language = Language(lang_abb=lang_abb, language_full=language_full,
                             create_ts=create_ts, update_ts=update_ts)
     db.session.add(new_language)
+    db.session.commit()
+
+    # Add application question for this language with empty values from existing english language question json
+    english_json = Question.query.get(1).question_JSON
+    
+    # Convert to dictionary
+    new_json = json.loads(english_json)
+
+    # Apply the function to your existing JSON
+    replace_keys_with_empty_strings(new_json)
+
+    # Set language
+    new_json['lang'] = lang_abb
+
+    # Convert the new JSON to a string
+    new_json_str = json.dumps(new_json, indent=2, ensure_ascii=False)
+
+    # Print the modified JSON
+    print(new_json_str)
+    
+    # save to application question
+    new_question = Question(language_id=new_language.id, question_category="",
+                            question_JSON=new_json_str, create_ts=create_ts, update_ts=update_ts)
+    db.session.add(new_question)
     db.session.commit()
     return new_language  # Return the newly added language object
 
@@ -114,13 +150,10 @@ def get_question_by_id(question_id):
     return Question.query.get(question_id)
 
 # Function to modify an existing question
-def modify_question(question_id, language_id, question_category, question_JSON, update_ts):
+def modify_question(question_id, question_JSON):
     question = Question.query.get(question_id)
     if question:
-        question.language_id = language_id
-        question.question_category = question_category
         question.question_JSON = question_JSON
-        question.update_ts = update_ts
         db.session.commit()
         return question  # Return the modified question object
     else:
