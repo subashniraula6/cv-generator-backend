@@ -60,6 +60,11 @@ class Firebase_Controller:
                 "status": 'Error',
                 "message": "User Email already exists. Try logging in instead",
             }
+        except Exception as e:
+            return {
+                "status": 'Error',
+                "message": str(e),
+            }
     
     # Function to log in a user
     @staticmethod
@@ -99,13 +104,18 @@ class Firebase_Controller:
             return False
 
         try:
+            # Delete user from Firebase
             auth.delete_user(u_id)
-            # Get data form u_id
-            user = User.query.filter_by(u_id=u_id).all()
-            # Get user_id from the user
-            user_id = user['data']['id']
-            db.session.delete(user_id)
-            db.session.commit()
-            return True
+
+            # Retrieve and delete user from the database
+            user = User.query.filter_by(u_id=u_id).first()
+            if user:
+                db.session.delete(user)
+                db.session.commit()
+                return True
+            else:
+                return False
         except auth.AuthError as e:
+            print(e)
             return False
+        
