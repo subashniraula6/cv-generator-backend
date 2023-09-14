@@ -1,7 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials, auth
 from flask import jsonify
-from models.kneg_models import db, User
+from models.kneg_models import db, User, UserQuestion
 
 from config import Config
 from controllers.kneg_ORM_controller import pupulate_user_questions
@@ -92,20 +92,28 @@ class Firebase_Controller:
         
     # Delete User
     @staticmethod
-    def delete_user(u_id, token):
-        token_verification = Firebase_Controller.verify_id_token(token)
-        print(f'here is u_id {u_id}')
-        if token_verification['status'] == 'Error':
-            return False
+    def delete_user(u_id):
+        # token_verification = Firebase_Controller.verify_id_token(token)
+        # print(f'here is u_id {u_id}')
+        # if token_verification['status'] == 'Error':
+        #     return False
 
         try:
             auth.delete_user(u_id)
             # Get data form u_id
-            user = User.query.filter_by(u_id=u_id).all()
+            user = User.query.filter_by(u_id=u_id).first()
+
             # Get user_id from the user
-            user_id = user['data']['id']
-            db.session.delete(user_id)
+            user_id = user.id
+
+            # Delete orphaned childs
+            user_questions = UserQuestion.query.filter_by(user_id=user_id).all()
+            for user_question in user_questions:
+                db.session.delete(user_question)
+
+            db.session.delete(user)
             db.session.commit()
             return True
-        except auth.AuthError as e:
+        except Exception as e:
+            print(e)
             return False

@@ -28,9 +28,10 @@ def delete_user():
     try:
         data = request.json
         u_id = data.get("u_id")
-        token = data.get("token")
-        if firebase.delete_user(u_id, token):
+        # token = data.get("token")
+        if firebase.delete_user(u_id):
             return jsonify({"success": "User deleted successfully"}), 200
-    except: 
+    except Exception as e: 
+        print(e)
         return jsonify({"error": "An error Occurred while deleting user."}), 500
         

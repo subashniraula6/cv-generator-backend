@@ -176,18 +176,21 @@ def pupulate_user_questions(user_id):
 ####################################
 # Function to add a new user question
 def add_user_question(user_id, language_id, questions_category, question_JSON, create_ts, update_ts):
-    new_user_question = UserQuestion(
-        user_id=user_id,
-        language_id=language_id,
-        questions_category=questions_category,
-        question_JSON=question_JSON,
-        create_ts=create_ts,
-        update_ts=update_ts
-    )
-    db.session.add(new_user_question)
-    db.session.commit()
-    return new_user_question  # Return the newly added user question object
-
+    try:
+        new_user_question = UserQuestion(
+            user_id=user_id,
+            language_id=language_id,
+            questions_category=questions_category,
+            question_JSON=question_JSON,
+            create_ts=create_ts,
+            update_ts=update_ts
+        )
+        db.session.add(new_user_question)
+        db.session.commit()
+        return new_user_question  # Return the newly added user question object
+    except Exception as e:
+        print(e)
+        
 # Function to get all user questions
 def get_all_user_questions():
     return UserQuestion.query.all()

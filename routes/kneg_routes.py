@@ -311,25 +311,39 @@ def get_question_by_id_route(question_id):
 
 @kneg_bp.route('/kneg/questions_per_user/<string:user_id>', methods=['GET'])
 def get_questions_by_user_id_route(user_id):
+    # Get parameters from the request query string
+    lang = request.args.get('lang')
+    language = Language.query.filter_by(lang_abb=lang).first()
     user = User.query.filter_by(u_id=user_id).first()
     try:
         # Fetch questions by user_id
-        questions = UserQuestion.query.filter_by(user_id=user.id).all()
-        if questions:
-            question_data = []
-            for question in questions:
-                language = Language.query.filter_by(id=question.language_id).first().lang_abb
-                question_data.append({
-                    "id": question.id,
-                    "language": language,
-                    "question_category": question.questions_category,
-                    "question_JSON": question.question_JSON,
-                    "create_ts": question.create_ts.strftime('%Y-%m-%d %H:%M:%S'),
-                    "update_ts": question.update_ts.strftime('%Y-%m-%d %H:%M:%S')
-                })
-            return jsonify({"data": question_data}), 200
-        else:
-            return jsonify({"error": "No questions found for the user"}), 404
+        questions = UserQuestion.query.filter_by(user_id=user.id, language_id=language.id).all()
+        if not questions:
+            # Create new user question with initial data from application json
+            app_question = Question.query.filter_by(language_id=language.id).first()
+            if(not app_question or not json.loads(app_question.question_JSON)["isComplete"]):
+                return jsonify({"error": "No questions found for the user"}), 404
+            
+            user_question = add_user_question(user.id, language.id, "", app_question.question_JSON, "2023-09-06T10:00:00", "2023-09-06T10:00:00")
+            if(not user_question):
+                # User question cannot be created
+                return jsonify({"error": "No questions found for the user"}), 404
+
+        # Fetch Again
+        questions = UserQuestion.query.filter_by(user_id=user.id, language_id=language.id).all()
+        question_data = []
+        for question in questions:
+            language = Language.query.filter_by(id=question.language_id).first().lang_abb
+            question_data.append({
+                "id": question.id,
+                "language": language,
+                "question_category": question.questions_category,
+                "question_JSON": question.question_JSON,
+                "create_ts": question.create_ts.strftime('%Y-%m-%d %H:%M:%S'),
+                "update_ts": question.update_ts.strftime('%Y-%m-%d %H:%M:%S')
+            })
+        return jsonify({"data": question_data}), 200
+        
     except Exception as e:
         return jsonify({"error": e}), 500
     
@@ -563,7 +577,10 @@ def filter_data_route():
 
         # Query UserQuestion records based on user_id
         user_questions = UserQuestion.query.filter_by(user_id=user_id).all()
+        
+        user_questions_dict = {column.name: getattr(user_questions[0], column.name) for column in user_questions[0].__table__.columns}
 
+        print(user_questions_dict)
         # Initialize an empty list to store filtered results
         filtered_results = []
 
