@@ -2,6 +2,7 @@ import os
 import json
 from flask import request, jsonify, Blueprint, send_from_directory
 from controllers.kneg_ORM_controller import *
+from sqlalchemy import desc, text
 
 UPLOAD_FOLDER = 'public/user_images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -67,6 +68,22 @@ def modify_user_role_route(role_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Route to modify an existing user roles
+@kneg_bp.route('/kneg/user-roles/<int:user_id>', methods=['PUT'])
+def modify_user_roles_route(user_id):
+    try:
+        data = request.json
+        role_id = data.get('role_id')
+
+        user = modify_user_roles(user_id, role_id)
+        if user:
+            role_data = {"id": user.id, "role_id": user.user_role_id}
+            return jsonify({"message": "User's role modified successfully", "data": role_data}), 200
+        else:
+            return jsonify({"error": "User's role not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # Route to delete a user role by ID
 @kneg_bp.route('/kneg/user-role/<int:role_id>', methods=['DELETE'])
 def delete_user_role_by_id_route(role_id):
@@ -98,12 +115,49 @@ def add_user_route():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Route to get all users
+# # Route to get all users
+# @kneg_bp.route('/kneg/users', methods=['GET'])
+# def get_all_users_route():
+#     users = get_all_users()
+#     users_data = [{"id": user.id, "email": user.email, "fname":user.user_fname, "lname":user.user_lname, "uid": user.u_id} for user in users]
+#     return jsonify({"data": users_data}), 200
+
 @kneg_bp.route('/kneg/users', methods=['GET'])
-def get_all_users_route():
-    users = get_all_users()
-    users_data = [{"id": user.id, "email": user.email, "fname":user.user_fname, "lname":user.user_lname, "uid": user.u_id} for user in users]
-    return jsonify({"data": users_data}), 200
+def get_users_route():
+    # Pagination parameters
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))  # Number of items per page
+
+    # Sorting parameters
+    sort_by = request.args.get('sort_by', 'id')  # Default sorting by user id
+    sort_order = request.args.get('sort_order', 'asc')  # Default ascending order
+
+    # Filtering parameters
+    search_term = request.args.get('search_term', '')
+
+    # Query construction
+    query = db.session.query(User)
+    
+    # Filtering based on search_term
+    if search_term:
+        query = query.filter(User.email.ilike(f"%{search_term}%"))
+
+    # Sorting
+    if sort_order == 'asc':
+        query = query.order_by(sort_by)
+    else:
+        query = query.order_by(desc(sort_by))  # Use desc from sqlalchemy
+
+    # Pagination
+    users = query.paginate(page=page, per_page=per_page, error_out=False)
+    users_data = [{"id": user.id, "email": user.email, "fname": user.user_fname, "lname": user.user_lname, "uid": user.u_id, "role_id": user.user_role_id, "role": UserRole.query.get(user.user_role_id).role_name} for user in users.items]
+
+    return jsonify({
+        "data": users_data,
+        "total_pages": users.pages,
+        "current_page": users.page,
+        "total_records": users.total
+    }), 200
 
 # Route to get a user by FIREBASE ID
 @kneg_bp.route('/kneg/fbuser/<string:u_id>', methods=['GET'])
@@ -604,3 +658,123 @@ def filter_data_route():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@kneg_bp.route('/user_questions', methods=['GET'])
+# def get_user_questions():
+#     # Pagination parameters
+#     page = request.args.get('page', default=1, type=int)
+#     per_page = request.args.get('per_page', default=10, type=int)
+
+#     # Sorting parameters
+#     sort_field = request.args.get('sort_field', default='id', type=str)
+#     sort_order = request.args.get('sort_order', default='asc', type=str)
+
+#     # Filtering parameters
+#     filter_param = request.args.get('filter', default=None, type=str)
+
+#     # Base query
+#     query = UserQuestion.query
+
+#     # Apply filters
+#     if filter_param:
+#         # For example, filter based on 'question_category' field
+#         query = query.filter(UserQuestion.question_category == filter_param)
+
+#     # Apply sorting
+#     if sort_order == 'asc':
+#         query = query.order_by(getattr(UserQuestion, sort_field).asc())
+#     else:
+#         query = query.order_by(getattr(UserQuestion, sort_field).desc())
+
+#     # Paginate the query
+#     user_questions = query.paginate(page=page, per_page=per_page, error_out=False)
+
+#     # Prepare the result
+#     result = {
+#         'total_items': user_questions.total,
+#         'page': user_questions.page,
+#         'per_page': user_questions.per_page,
+#         'items': []
+#     }
+
+#     for uq in user_questions.items:
+#         # Parse the question_JSON column as a dictionary
+#         question_data = json.loads(uq.question_JSON)
+#         # Iterate through sections and questions
+#         for section_name, section_data in question_data.items():
+#             ignored = ["isNext", "lang", "isComplete"]
+#             if section_name in ignored:
+#                 continue
+#             if 'questions' in section_data:
+#                 for question in section_data['questions']:
+#                     if(question['answer']): # only if answer is present
+#                         result['items'].append({
+#                             'user_id': uq.user_id,
+#                             'question_section': section_name,
+#                             'question': question['question'],
+#                             'answer': question['answer']
+#                         })
+
+#     return jsonify(result)
+
+def get_user_questions():
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
+    query = request.args.get('query', '')
+    sort_field = request.args.get('sort_field', 'create_ts')
+    sort_order = request.args.get('sort_order', 'desc')
+
+    # Create a SQLAlchemy query for the UserQuestion model
+    base_query = db.session.query(
+        UserQuestion.question_JSON,
+        UserQuestion.user_id
+    )
+
+    # Add filters
+    if query:
+        base_query = base_query.filter(UserQuestion.question_JSON.ilike(f'%{query}%'))
+
+    # Add sorting
+    if sort_field and sort_order:
+        sort_expression = text(f'{sort_field} {sort_order}')
+        base_query = base_query.order_by(sort_expression)
+
+    # Paginate the results
+    paginated_query = base_query.paginate(page=page, per_page=per_page, error_out=False)
+
+    user_questions = []
+    for result in paginated_query.items:
+        # Process the JSON data and extract the required fields
+        question_json = json.loads(result[0])
+        user_id = result[1]
+
+        # Initialize lists to store extracted data
+        all_sections_data = []
+
+        # Iterate through all sections
+        for section_name, section_data in question_json.items():
+            if isinstance(section_data, dict):
+                # Check if the section contains questions
+                section_questions = section_data.get('questions', [])
+                for question in section_questions:
+                    if(question['answer'] and question['answer'] != 'yes' and question['answer'] != 'no'):
+                        all_sections_data.append({
+                            'section_name': section_name,
+                            'question': question.get('question', ''),
+                            'answer': question.get('answer', '')
+                        })
+
+        if(all_sections_data):
+            user_questions.append({
+                'user_id': user_id,
+                'user_email': User.query.get(user_id).email,
+                'all_sections_data': all_sections_data
+            })
+
+    response = {
+        'total': paginated_query.total,
+        'page': page,
+        'per_page': per_page,
+        'items': user_questions
+    }
+    return jsonify(response)

@@ -1,7 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials, auth
 from flask import jsonify
-from models.kneg_models import db, User, UserQuestion
+from models.kneg_models import db, User, UserQuestion, UserRole
 
 from config import Config
 from controllers.kneg_ORM_controller import pupulate_user_questions
@@ -38,10 +38,12 @@ class Firebase_Controller:
     def create_user(email, password):
         try:
             user = auth.create_user(email=email, password=password)
-            print(auth.generate_email_verification_link(email))
+
+            # Get role id with role "USER"
+            user_role_id = UserRole.query.filter_by(role_name="User").first().id
 
             # Create a new user in your database with the provided email
-            new_user = User(email=email, user_fname=None, user_lname=None, user_role_id=None, u_id=user.uid, create_ts=None, update_ts=None)
+            new_user = User(email=email, user_fname=None, user_lname=None, user_role_id=user_role_id, u_id=user.uid, create_ts=None, update_ts=None)
             db.session.add(new_user)
             db.session.commit()
 
@@ -92,19 +94,14 @@ class Firebase_Controller:
         
     # Delete User
     @staticmethod
-    def delete_user(u_id):
-        # token_verification = Firebase_Controller.verify_id_token(token)
-        # print(f'here is u_id {u_id}')
-        # if token_verification['status'] == 'Error':
-        #     return False
-
+    def delete_user(user_id):
         try:
-            auth.delete_user(u_id)
+            user = User.query.get(user_id)
+            if not user:
+                return False
+            
+            auth.delete_user(user.u_id)
             # Get data form u_id
-            user = User.query.filter_by(u_id=u_id).first()
-
-            # Get user_id from the user
-            user_id = user.id
 
             # Delete orphaned childs
             user_questions = UserQuestion.query.filter_by(user_id=user_id).all()

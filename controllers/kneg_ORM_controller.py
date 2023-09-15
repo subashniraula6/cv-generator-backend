@@ -28,6 +28,16 @@ def modify_user_role(role_id, role_name, update_ts):
     else:
         return None  # Role with the given ID not found
 
+# Function to modify user's role
+def modify_user_roles(user_id, role_id):
+    user = User.query.get(user_id)
+    if user:
+        user.user_role_id = role_id
+        db.session.commit()
+        return user  # Return the modified role object
+    else:
+        return None  # Role with the given ID not found
+
 
 
 ############################
@@ -135,11 +145,18 @@ def modify_language(language_id, lang_abb, language_full, update_ts):
 ###############################
 # Function to add a new question
 def add_question(language_id, question_category, question_JSON, create_ts, update_ts):
-    new_question = Question(language_id=language_id, question_category=question_category,
-                            question_JSON=question_JSON, create_ts=create_ts, update_ts=update_ts)
-    db.session.add(new_question)
-    db.session.commit()
-    return new_question  # Return the newly added question object
+    existing_question = Question.query.filter_by(language_id=language_id).first()
+    if existing_question:
+        existing_question.question_category = question_category
+        existing_question.question_JSON = question_JSON
+        db.session.commit()
+        return existing_question
+    else:
+        new_question = Question(language_id=language_id, question_category=question_category,
+                                question_JSON=question_JSON, create_ts=create_ts, update_ts=update_ts)
+        db.session.add(new_question)
+        db.session.commit()
+        return new_question  # Return the newly added question object
 
 # Function to get all questions
 def get_all_questions():
