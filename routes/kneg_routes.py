@@ -251,7 +251,6 @@ def add_language_route():
         existing_language = Language.query.filter_by(lang_abb=lang_abb).first()
         if (existing_language):
             return jsonify({"error": "Language already exists"}), 400
-
         if lang_abb and language_full and create_ts and update_ts:
             new_language = add_language(lang_abb, language_full, create_ts, update_ts)
             return jsonify({"message": "Language added successfully"}), 200

@@ -97,7 +97,8 @@ def add_language(lang_abb, language_full, create_ts, update_ts):
     db.session.commit()
 
     # Add application question for this language with empty values from existing english language question json
-    english_json = Question.query.get(1).question_JSON
+    engLanguage = Language.query.filter_by(lang_abb='en').first()
+    english_json = Question.query.filter_by(language_id=engLanguage.id).first().question_JSON
     
     # Convert to dictionary
     new_json = json.loads(english_json)
