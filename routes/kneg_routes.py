@@ -26,9 +26,11 @@ def add_user_role_route():
         update_ts = data.get('update_ts')  # You can format this as needed
 
         if role_name and create_ts and update_ts:
-            new_role = add_user_role(role_name, create_ts, update_ts)
-            print(new_role)
-            return jsonify({"message": "User role added successfully"}), 200
+            isAdded = add_user_role(role_name, create_ts, update_ts)
+            if(isAdded):
+                return jsonify({"message": "User role added successfully"}), 200
+            else:
+                return jsonify({"message": "User role already present"}), 400
         else:
             return jsonify({"error": "Missing required data"}), 400
     # except Exception as e:

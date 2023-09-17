@@ -1,13 +1,18 @@
 # db_controller.py
 from models.kneg_models import db, UserRole, User, Language, Question, UserQuestion, MenuText
 import json
+from sqlalchemy import func
 
 # Function to add a new user role
 def add_user_role(role_name, create_ts, update_ts):
-    new_role = UserRole(role_name=role_name, create_ts=create_ts, update_ts=update_ts)
-    db.session.add(new_role)
-    db.session.commit()
-    return new_role  # Return the newly added role object
+    existing = UserRole.query.filter(func.lower(UserRole.role_name) == func.lower(role_name)).first()
+    if(existing):
+        return False
+    else:
+        new_role = UserRole(role_name=role_name, create_ts=create_ts, update_ts=update_ts)
+        db.session.add(new_role)
+        db.session.commit()
+        return True  # Return the newly added role object
 
 # Function to get all user roles
 def get_all_user_roles():
