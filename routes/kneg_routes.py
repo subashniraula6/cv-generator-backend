@@ -658,122 +658,66 @@ def filter_data_route():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+# Define a route for querying questions and answers with pagination
 @kneg_bp.route('/user_questions', methods=['GET'])
-# def get_user_questions():
-#     # Pagination parameters
-#     page = request.args.get('page', default=1, type=int)
-#     per_page = request.args.get('per_page', default=10, type=int)
-
-#     # Sorting parameters
-#     sort_field = request.args.get('sort_field', default='id', type=str)
-#     sort_order = request.args.get('sort_order', default='asc', type=str)
-
-#     # Filtering parameters
-#     filter_param = request.args.get('filter', default=None, type=str)
-
-#     # Base query
-#     query = UserQuestion.query
-
-#     # Apply filters
-#     if filter_param:
-#         # For example, filter based on 'question_category' field
-#         query = query.filter(UserQuestion.question_category == filter_param)
-
-#     # Apply sorting
-#     if sort_order == 'asc':
-#         query = query.order_by(getattr(UserQuestion, sort_field).asc())
-#     else:
-#         query = query.order_by(getattr(UserQuestion, sort_field).desc())
-
-#     # Paginate the query
-#     user_questions = query.paginate(page=page, per_page=per_page, error_out=False)
-
-#     # Prepare the result
-#     result = {
-#         'total_items': user_questions.total,
-#         'page': user_questions.page,
-#         'per_page': user_questions.per_page,
-#         'items': []
-#     }
-
-#     for uq in user_questions.items:
-#         # Parse the question_JSON column as a dictionary
-#         question_data = json.loads(uq.question_JSON)
-#         # Iterate through sections and questions
-#         for section_name, section_data in question_data.items():
-#             ignored = ["isNext", "lang", "isComplete"]
-#             if section_name in ignored:
-#                 continue
-#             if 'questions' in section_data:
-#                 for question in section_data['questions']:
-#                     if(question['answer']): # only if answer is present
-#                         result['items'].append({
-#                             'user_id': uq.user_id,
-#                             'question_section': section_name,
-#                             'question': question['question'],
-#                             'answer': question['answer']
-#                         })
-
-#     return jsonify(result)
-
-def get_user_questions():
-    page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 10))
-    query = request.args.get('query', '')
-    sort_field = request.args.get('sort_field', 'create_ts')
-    sort_order = request.args.get('sort_order', 'desc')
-
-    # Create a SQLAlchemy query for the UserQuestion model
-    base_query = db.session.query(
-        UserQuestion.question_JSON,
-        UserQuestion.user_id
+def get_questions():
+    page = request.args.get('page', default=1, type=int)
+    per_page = request.args.get('per_page', default=10, type=int)
+    query = request.args.get('query', default='', type=str)
+    email_query = request.args.get('email', default='', type=str)
+    question_query = request.args.get('question', default='', type=str)
+    answer_query = request.args.get('answer', default='', type=str)
+    # Build the SQL query for filtering based on user_id and answer
+    filter_query = (
+        text("SELECT q.user_id, u.email, q.question_JSON "
+             "FROM user_questions q "
+             "LEFT JOIN application_users u ON q.user_id = u.id "
+             "WHERE q.user_id = :user_id OR "
+             "LOWER(u.email) LIKE LOWER(:email_query) OR "
+             "LOWER(CONVERT(q.question_JSON USING utf8mb4)) LIKE LOWER(:query) OR "
+             "LOWER(q.question_JSON->'$.*.questions[*].question') LIKE LOWER(:question_query) OR "
+             "LOWER(q.question_JSON->'$.*.questions[*].answer') LIKE LOWER(:answer_query)")
+        .bindparams(user_id=query, query=f'%{query}%', email_query=f'%{email_query}%', question_query=f'%{question_query}%', answer_query=f'%{answer_query}%')
     )
 
-    # Add filters
-    if query:
-        base_query = base_query.filter(UserQuestion.question_JSON.ilike(f'%{query}%'))
+    # Execute the query using a connection
+    with db.engine.connect() as connection:
+        results = connection.execute(filter_query).fetchall()
 
-    # Add sorting
-    if sort_field and sort_order:
-        sort_expression = text(f'{sort_field} {sort_order}')
-        base_query = base_query.order_by(sort_expression)
+    # Extract questions and answers from the parsed JSON structure, filter out answers with empty strings
+    questions_and_answers = []
+    for result in results:
+        user_id = result.user_id
+        email = result.email
+        question_JSON_str = result.question_JSON
+        question_JSON = json.loads(question_JSON_str)
 
-    # Paginate the results
-    paginated_query = base_query.paginate(page=page, per_page=per_page, error_out=False)
-
-    user_questions = []
-    for result in paginated_query.items:
-        # Process the JSON data and extract the required fields
-        question_json = json.loads(result[0])
-        user_id = result[1]
-
-        # Initialize lists to store extracted data
-        all_sections_data = []
-
-        # Iterate through all sections
-        for section_name, section_data in question_json.items():
-            if isinstance(section_data, dict):
-                # Check if the section contains questions
-                section_questions = section_data.get('questions', [])
+        for section_key in question_JSON:
+            section = question_JSON[section_key]
+            if(isinstance(section, dict) and 'questions' in section):
+                section_questions = section.get('questions', [])
                 for question in section_questions:
-                    if(question['answer'] and question['answer'] != 'yes' and question['answer'] != 'no'):
-                        all_sections_data.append({
-                            'section_name': section_name,
-                            'question': question.get('question', ''),
-                            'answer': question.get('answer', '')
-                        })
+                    question_text = question.get('question').strip()
+                    answer = question.get('answer').strip()
+                    if answer and answer != 'yes' and answer !='no' and email_query.lower() in email.lower() and question_query.lower() in question_text.lower() and answer_query.lower() in answer.lower():  # Check if answer is not empty or contains only whitespaces and filter query as well
+                        questions_and_answers.append({'user_id': user_id, 'email': email, 'question': question_text, 'answer': answer})
 
-        if(all_sections_data):
-            user_questions.append({
-                'user_id': user_id,
-                'user_email': User.query.get(user_id).email,
-                'all_sections_data': all_sections_data
-            })
+    # Calculate total items and total pages
+    total_items = len(questions_and_answers)
+    total_pages = (total_items + per_page - 1) // per_page
 
-    response = {
-        'total': paginated_query.total,
+    # Perform pagination on the extracted list
+    start_idx = (page - 1) * per_page
+    end_idx = start_idx + per_page
+    paginated_questions_and_answers = questions_and_answers[start_idx:end_idx]
+
+    # Create a response JSON that includes total items, total pages, and paginated data
+    response_data = {
+        'total_items': total_items,
+        'total_pages': total_pages,
         'page': page,
         'per_page': per_page,
-        'items': user_questions
+        'questions_and_answers': paginated_questions_and_answers
     }
-    return jsonify(response)
+
+    return jsonify(response_data)
