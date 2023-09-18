@@ -35,3 +35,17 @@ def delete_user():
         print(e)
         return jsonify({"error": "An error Occurred while deleting user."}), 500
         
+
+@user_bp.route('/test_delete_user', methods=['POST'])
+def test_delete_user():
+    # try:
+    data = request.json
+    uid = data.get("uid")
+    # token = data.get("token")
+    if firebase.test_delete_user(uid):
+        return jsonify({"success": "User deleted successfully"}), 200
+    return jsonify({"error": "An error Occurred while deleting user."}), 500
+    # except Exception as e: 
+    #     print(e)
+    #     return jsonify({"error": "An error Occurred while deleting user."}), 500
+        

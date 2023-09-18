@@ -100,6 +100,7 @@ class Firebase_Controller:
             if not user:
                 return False
             
+
             auth.delete_user(user.u_id)
             # Get data form u_id
 
@@ -112,5 +113,23 @@ class Firebase_Controller:
             db.session.commit()
             return True
         except Exception as e:
+            print(e)
+            return False
+
+    # Test Delete User
+    @staticmethod
+    def test_delete_user(uid):
+        try:
+            # user = User.query.get(user_id)
+            # if not user:
+            #     return False
+            
+            print('**********************')
+            print(auth.delete_user(uid))
+            # Get data form u_id
+
+            return True
+        except Exception as e:
+            print('*/********************')
             print(e)
             return False
