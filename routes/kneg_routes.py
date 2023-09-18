@@ -4,7 +4,7 @@ from flask import request, jsonify, Blueprint, send_from_directory
 from controllers.kneg_ORM_controller import *
 from sqlalchemy import desc, text
 
-UPLOAD_FOLDER = 'public/user_images'
+UPLOAD_FOLDER = 'static/images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -596,9 +596,10 @@ def upload_image():
         if file and allowed_file(file.filename):
             # Save the file to the upload folder
             extension = os.path.splitext(file.filename)[1]
-            image_file_name = f'user_image_{user_id}.{extension}'
-            file.save(os.path.join(UPLOAD_FOLDER, image_file_name))
-            return jsonify({"message": "File uploaded successfully"}), 200
+            image_file_name = f'user_image_{user_id}{extension}'
+            save_path = os.path.join(UPLOAD_FOLDER, image_file_name) 
+            file.save(save_path)
+            return jsonify({"message": "File uploaded successfully", "path": save_path}), 200
         else:
             return jsonify({"error": "Invalid file or file type"}), 400
 
