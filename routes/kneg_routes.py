@@ -368,15 +368,16 @@ def get_question_by_id_route(question_id):
 def get_questions_by_user_id_route(user_id):
     # Get parameters from the request query string
     lang = request.args.get('lang')
+    create = request.args.get('create')
     language = Language.query.filter_by(lang_abb=lang).first()
     user = User.query.filter_by(u_id=user_id).first()
     try:
         # Fetch questions by user_id
         questions = UserQuestion.query.filter_by(user_id=user.id, language_id=language.id).all()
-        if not questions:
+        if not questions or create == "true": # Create new question if not existing profile or user chooses to create
             # Create new user question with initial data from application json
             app_question = Question.query.filter_by(language_id=language.id).first()
-            if(not app_question or not json.loads(app_question.question_JSON)["isComplete"]):
+            if(not app_question or not json.loads(app_question.question_JSON).get("isComplete")):
                 return jsonify({"error": "No questions found for the user"}), 404
             
             user_question = add_user_question(user.id, language.id, "", app_question.question_JSON, "2023-09-06T10:00:00", "2023-09-06T10:00:00")

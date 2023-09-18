@@ -200,6 +200,13 @@ def pupulate_user_questions(user_id):
 # Function to add a new user question
 def add_user_question(user_id, language_id, questions_category, question_JSON, create_ts, update_ts):
     try:
+        existing = UserQuestion.query.filter_by(user_id=user_id, language_id=language_id).all()
+        if existing:
+            # delete existing user questions
+            for existing_question in existing:
+                db.session.delete(existing_question)
+                db.session.commit()
+
         new_user_question = UserQuestion(
             user_id=user_id,
             language_id=language_id,
