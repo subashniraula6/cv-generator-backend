@@ -583,8 +583,7 @@ def delete_menu_text_by_id_route(menu_text_id):
 @kneg_bp.route('/kneg/upload_image', methods=['POST'])
 def upload_image():
     try:
-        data = request.json
-        user_id = data.user_id
+        user_id = request.form.get('user_id')
         if user_id == None:
             return jsonify({"error": "User Id not found"})
         # Check if the 'file' key is in the request

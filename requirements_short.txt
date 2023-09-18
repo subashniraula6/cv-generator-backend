@@ -1,0 +1,12 @@
+Flask
+Flask-Cors
+Gunicorn
+openai
+python-dotenv
+
+mysql-connector-python
+# python-dotenv
+
+Flask-SQLAlchemy
+pymysql
+firebase-admin
