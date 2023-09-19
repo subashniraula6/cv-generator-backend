@@ -103,28 +103,29 @@ def add_language(lang_abb, language_full, create_ts, update_ts):
 
     # Add application question for this language with empty values from existing english language question json
     engLanguage = Language.query.filter_by(lang_abb='en').first()
-    english_json = Question.query.filter_by(language_id=engLanguage.id).first().question_JSON
+    if(engLanguage):
+        english_json = Question.query.filter_by(language_id=engLanguage.id).first().question_JSON
     
-    # Convert to dictionary
-    new_json = json.loads(english_json)
+        # Convert to dictionary
+        new_json = json.loads(english_json)
 
-    # Apply the function to your existing JSON
-    replace_keys_with_empty_strings(new_json)
+        # Apply the function to your existing JSON
+        replace_keys_with_empty_strings(new_json)
 
-    # Set language
-    new_json['lang'] = lang_abb
+        # Set language
+        new_json['lang'] = lang_abb
 
-    # Convert the new JSON to a string
-    new_json_str = json.dumps(new_json, indent=2, ensure_ascii=False)
+        # Convert the new JSON to a string
+        new_json_str = json.dumps(new_json, indent=2, ensure_ascii=False)
 
-    # Print the modified JSON
-    print(new_json_str)
-    
-    # save to application question
-    new_question = Question(language_id=new_language.id, question_category="",
-                            question_JSON=new_json_str, create_ts=create_ts, update_ts=update_ts)
-    db.session.add(new_question)
-    db.session.commit()
+        # Print the modified JSON
+        print(new_json_str)
+        
+        # save to application question
+        new_question = Question(language_id=new_language.id, question_category="",
+                                question_JSON=new_json_str, create_ts=create_ts, update_ts=update_ts)
+        db.session.add(new_question)
+        db.session.commit()
     return new_language  # Return the newly added language object
 
 # Function to get all languages
