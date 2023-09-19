@@ -1,5 +1,6 @@
 Env/
 venv/
+kneg/
 .env
 __pycache__
 LISENCE
