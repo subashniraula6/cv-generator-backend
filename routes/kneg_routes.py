@@ -678,8 +678,8 @@ def get_questions():
              "WHERE q.user_id = :user_id OR "
              "LOWER(u.email) LIKE LOWER(:email_query) OR "
              "LOWER(CONVERT(q.question_JSON USING utf8mb4)) LIKE LOWER(:query) OR "
-             "LOWER(q.question_JSON->'$.*.questions[*].question') LIKE LOWER(:question_query) OR "
-             "LOWER(q.question_JSON->'$.*.questions[*].answer') LIKE LOWER(:answer_query)")
+             "LOWER(JSON_UNQUOTE(JSON_EXTRACT(q.question_JSON, '$.*.questions[*].question'))) LIKE LOWER(:question_query) OR "
+             "LOWER(JSON_UNQUOTE(JSON_EXTRACT(q.question_JSON, '$.*.questions[*].answer'))) LIKE LOWER(:answer_query)")
         .bindparams(user_id=query, query=f'%{query}%', email_query=f'%{email_query}%', question_query=f'%{question_query}%', answer_query=f'%{answer_query}%')
     )
 
