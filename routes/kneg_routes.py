@@ -377,7 +377,7 @@ def get_questions_by_user_id_route(user_id):
         if not questions or create == "true": # Create new question if not existing profile or user chooses to create
             # Create new user question with initial data from application json
             app_question = Question.query.filter_by(language_id=language.id).first()
-            if(not app_question or not json.loads(app_question.question_JSON).get("isComplete")):
+            if(not app_question or (not json.loads(app_question.question_JSON).get("isComplete") and lang != 'en')):
                 return jsonify({"error": "No questions found for the user"}), 404
             
             user_question = add_user_question(user.id, language.id, "", app_question.question_JSON, "2023-09-06T10:00:00", "2023-09-06T10:00:00")
