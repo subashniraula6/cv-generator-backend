@@ -2,6 +2,7 @@
 import json
 from flask import request, jsonify, Blueprint
 from controllers.firebase_controller import Firebase_Controller
+from controllers.kneg_ORM_controller import createOrLoginUser
 
 user_bp = Blueprint('user', __name__)
 
@@ -49,3 +50,12 @@ def test_delete_user():
     #     print(e)
     #     return jsonify({"error": "An error Occurred while deleting user."}), 500
         
+@user_bp.route('/createOrLogin', methods=['POST'])
+def createOrLogin():
+    data = request.json
+    email = data.get("email")
+    uid = data.get("uid")
+    isCreated = createOrLoginUser(email, uid)
+    if isCreated:
+        return jsonify({"success": "User created successfully"}), 200
+    return jsonify({"success": "User already exist"}), 200

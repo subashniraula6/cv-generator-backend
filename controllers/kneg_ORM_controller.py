@@ -358,3 +358,14 @@ def filter_data(data, user_id, title=None, question=None, answer=None):
     user_email = user.email if user else None
     
     return {"user_id": user_id, "user_email": user_email, "filtered_data": filtered_data}
+
+def createOrLoginUser(email, uid):
+    user = User.query.filter_by(email=email).first()
+    if (not user):
+        new_user = User(email=email, user_fname=None, user_lname=None, user_role_id=3, u_id=uid, create_ts=None, update_ts=None)
+        db.session.add(new_user)
+        db.session.commit()
+        return True
+    else:
+        return False 
+
