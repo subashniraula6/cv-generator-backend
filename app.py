@@ -26,7 +26,7 @@ db.init_app(app)
 
 
  # Create all tables in database. Comment after first time use
-#with app.app_context():
+# with app.app_context():
 #    print(app.app_context())
 #    db.create_all()
 

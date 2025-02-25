@@ -1,19 +1,33 @@
 import os
-import openai
+import google.generativeai as genai
 from dotenv import load_dotenv
-from config import Config
+
 load_dotenv()
 
-CONFIG = Config.openAI_config()
-openai.api_key = CONFIG['API_KEY']
-if openai.api_key is None:
-    raise ValueError("OPENAI_API_KEY environment variable not found. Please set it in the .env file.")
+gemini_api_key = os.getenv("GEMINI_API_KEY")
 
-def get_openai_response(engine: str, prompt: str) -> str:
-    print(f"here is confgi {CONFIG} & {CONFIG['API_KEY']}")
+genai.configure(api_key=gemini_api_key)
 
+if gemini_api_key is None:
+    raise ValueError(
+        "GEMINI_API_KEY environment variable not found. Please set it in the .env file."
+    )
+
+model = genai.GenerativeModel("gemini-pro")
+
+def get_openai_response(prompt: str) -> str:
     try:
-        response = openai.Completion.create(engine=engine, prompt=prompt, max_tokens=2049, temperature=0.7, n=1, stop=None)
-        return response.choices[0].text.strip()
+        response = model.generate_content(prompt) # Correct method
+
+        # Check for safety issues
+        if response.prompt_feedback and response.prompt_feedback.block_reason:
+            return f"Blocked due to safety reasons: {response.prompt_feedback.block_reason}"
+
+        # Extract generated text from the first part
+        if response.parts and len(response.parts) > 0:
+            return response.parts[0].text.strip()
+        else:
+            return "No text generated."
+
     except Exception as e:
-        return "Error calling OpenAI API", 500
+        return str(e)

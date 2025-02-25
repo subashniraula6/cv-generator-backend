@@ -18,17 +18,8 @@ def profile():
 @openai_bp.route("/chat", methods=["POST"])
 def get_result():
     request_data = request.get_json()
-    prompt = request_data.get("prompt", "")
-    engine = request_data.get("engine", "text-davinci-003")
-    
-    # So that garbage from frontend doesn't pass ahead
-    if engine not in all_engines:
-        engine = "text-davinci-003"
+    prompt = request_data.get("prompt")
 
-    password = request_data.get("password","")
-    if password != pass_phrase: 
-        return jsonify({"Error":"Incorrect Key"})
-
-    response = get_openai_response(engine, prompt)
+    response = get_openai_response(prompt)
     return jsonify({"prompt": prompt, "response": response})
 

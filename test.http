@@ -8,13 +8,53 @@
 #     "update_ts": "2023-09-06T10:00:00"
 # }
 
+# POST http://127.0.0.1:5000/kneg/question
+# Content-Type: application/json
+
+# {
+#     "language_id": 1,
+#     "question_category": "General",
+#     "question_JSON": "",
+#     "create_ts": "2023-09-06T10:00:00",
+#     "update_ts": "2023-09-06T10:00:00"
+# }
+# GET http://127.0.0.1:5000/kneg/languages
+
+# POST http://127.0.0.1:5000/kneg/user-role
+# Content-Type: application/json
+
+# {
+#     "role_name": "superadmin",
+#     "create_ts": "2023-09-06T10:00:00",
+#     "update_ts": "2023-09-06T10:00:00"
+# }
+
+# POST http://127.0.0.1:5000/kneg/user-role
+# Content-Type: application/json
+
+# {
+#     "role_name": "admin",
+#     "create_ts": "2023-09-06T10:00:00",
+#     "update_ts": "2023-09-06T10:00:00"
+# }
+
+# POST http://127.0.0.1:5000/kneg/user-role
+# Content-Type: application/json
+
+# {
+#     "role_name": "user",
+#     "create_ts": "2023-09-06T10:00:00",
+#     "update_ts": "2023-09-06T10:00:00"
+# }
+
+# GET http://127.0.0.1:5000/kneg/user-roles
 POST http://127.0.0.1:5000/kneg/question
 Content-Type: application/json
 
 {
     "language_id": 1,
     "question_category": "General",
-    "question_JSON": "",
+    "question_JSON": "What is the capital of France?",
     "create_ts": "2023-09-06T10:00:00",
     "update_ts": "2023-09-06T10:00:00"
 }
