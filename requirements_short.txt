@@ -10,3 +10,6 @@ mysql-connector-python
 Flask-SQLAlchemy
 pymysql
 firebase-admin
+
+google-generativeai
+
