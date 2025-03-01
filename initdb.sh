@@ -20,3 +20,6 @@ curl -X POST "$backend_url/user-role" \
   -H "Content-Type: application/json" \
   -d '{"role_name": "user", "create_ts": "2023-09-06T10:00:00", "update_ts": "2023-09-06T10:00:00"}'
 
+curl -X POST "$backend_url/question" \
+     -H "Content-Type: application/json" \
+     -d @questions.json
