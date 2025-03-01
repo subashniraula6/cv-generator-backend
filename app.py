@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+#from flask_cors import CORS
 from dotenv import load_dotenv
 from config import Config
 from models.kneg_models import db
@@ -24,13 +24,19 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = Config.mySQL_alchemy_config()['DATABASE_URI']
 db.init_app(app)
 
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
  # Create all tables in database. Comment after first time use
 # with app.app_context():
 #    print(app.app_context())
 #    db.create_all()
 
-CORS(app)  # Enable CORS for all origins. Replace with specific origins if needed.
+#CORS(app)  # Enable CORS for all origins. Replace with specific origins if needed.
 
 app.register_blueprint(openai_bp)
 # app.register_blueprint(serpapi_bp)
@@ -108,4 +114,4 @@ firebase_controller = Firebase_Controller()
 #         })
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0', port=5000)
