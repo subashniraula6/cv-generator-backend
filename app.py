@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-#from flask_cors import CORS
+from flask_cors import CORS
 from dotenv import load_dotenv
 from config import Config
 from models.kneg_models import db
@@ -18,6 +18,7 @@ from mysql.connector import Error
 import secrets 
 
 app = Flask(__name__)
+CORS(app, origins='*')
 app.config['SQLALCHEMY_DATABASE_URI'] = Config.mySQL_alchemy_config()['DATABASE_URI']
 db.init_app(app)
 
