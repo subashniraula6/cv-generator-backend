@@ -13,3 +13,4 @@ firebase-admin
 
 google-generativeai
 
+python-dateutil

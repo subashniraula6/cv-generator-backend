@@ -4,7 +4,7 @@ kneg/
 .env
 __pycache__
 LISENCE
-private_keys/
+private_keys/knegg_firebase_p_key.json
 apiTest.http
 myreadme.md
 ideas
